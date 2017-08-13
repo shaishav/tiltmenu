@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.hardware.SensorManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -88,6 +89,8 @@ public class ExperimentActivity extends AppCompatActivity {
         }
     };
 
+    private SensorListener sensorListener;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,6 +125,10 @@ public class ExperimentActivity extends AppCompatActivity {
         // created, to briefly hint to the user that UI controls
         // are available.
         delayedHide(100);
+
+        sensorListener = new SensorListener(this);
+        sensorListener.registerSensorRotationVector(SensorManager.SENSOR_DELAY_GAME);
+
     }
 
     @Override
