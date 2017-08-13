@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">Tilt</string>
+    <string name="MainActivity_pid_header">Participant ID:</string>
+    <string name="MainActivity_setup_button">Setup</string>
+    <string name="MainActivity_run_button">Run Experiment</string>
+    <string name="MainActivity_start_button">Start Experiment</string>
+
+    <string name="title_activity_experiment">ExperimentActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
 </resources>
