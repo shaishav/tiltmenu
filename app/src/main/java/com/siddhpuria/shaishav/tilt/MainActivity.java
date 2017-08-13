@@ -6,6 +6,11 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+/**
+ * MainActivity.java
+ * Launcher activity of the app that displays experiment configuration options and launches the
+ * activity for the experiment based on the configuration.
+ */
 public class MainActivity extends AppCompatActivity {
 
     public static final String EXPERIMENT_CONFIG = "com.shaishav.siddhpuria.mainactivity.experimentconfig";
@@ -26,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Launches the experiment activity based on the configuration options selected.
+     */
     public void launchExperimentActivity() {
         Intent intent = new Intent(this, ExperimentActivity.class);
         String configString = getExperimentConfig();
@@ -33,6 +41,9 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    /**
+     * TODO gathers the configuration options in the MainActivity layout.
+     */
     public String getExperimentConfig() {
         return "";
     }
