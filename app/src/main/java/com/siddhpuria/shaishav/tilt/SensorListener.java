@@ -6,6 +6,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener2;
 import android.hardware.SensorManager;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+
 /**
  * SensorListener.java
  * Listener class for various sensor events. This can be extended by registering listener methods
@@ -16,14 +19,21 @@ public class SensorListener implements SensorEventListener2 {
 
     private SensorManager sensorManager;
     Sensor rotationVectorSensor;
+    private HashMap<Sensor, ArrayList<ModelObserver>> sensorObserversMap;
+
+
 
     public SensorListener(Context ctx) {
         sensorManager = (SensorManager) ctx.getSystemService(ctx.SENSOR_SERVICE);
         rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+
+        sensorObserversMap = new HashMap<>();
+        sensorObserversMap.put(rotationVectorSensor, new ArrayList<ModelObserver>());
     }
 
-    public void registerSensorRotationVector(int samplingFrequency) {
+    public void registerSensorRotationVector(ModelObserver obs, int samplingFrequency) {
         sensorManager.registerListener(this, rotationVectorSensor, samplingFrequency);
+        sensorObserversMap.get(rotationVectorSensor).add(obs);
     }
 
     public void unregisterSensorRotationVector() {
@@ -36,7 +46,10 @@ public class SensorListener implements SensorEventListener2 {
     @Override
     public void onSensorChanged(SensorEvent event) {
         if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
-            System.out.println(+event.values[0]+" "+event.values[1]+" "+event.values[2]+" ");
+
+            for (ModelObserver obs : sensorObserversMap.get(rotationVectorSensor)) {
+                obs.notifySensorEventUpdate(event);
+            }
 
         }
     }

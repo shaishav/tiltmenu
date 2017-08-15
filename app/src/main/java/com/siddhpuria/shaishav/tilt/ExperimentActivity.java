@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -18,7 +19,7 @@ import android.support.v4.app.NavUtils;
  * ExperimentActivity.java
  * This assembles the tilt-menu interaction specifically to the configuration passed.
  */
-public class ExperimentActivity extends AppCompatActivity {
+public class ExperimentActivity extends AppCompatActivity implements ModelObserver {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -127,7 +128,7 @@ public class ExperimentActivity extends AppCompatActivity {
         delayedHide(100);
 
         sensorListener = new SensorListener(this);
-        sensorListener.registerSensorRotationVector(SensorManager.SENSOR_DELAY_GAME);
+        sensorListener.registerSensorRotationVector(this, SensorManager.SENSOR_DELAY_GAME);
 
     }
 
@@ -185,4 +186,19 @@ public class ExperimentActivity extends AppCompatActivity {
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
 
+    @Override
+    protected void onDestroy() {
+        sensorListener.unregisterSensorRotationVector();
+        super.onDestroy();
+    }
+
+    /**
+     * Receive sensor updates from the subject
+     */
+    @Override
+    public void notifySensorEventUpdate(SensorEvent event) {
+
+
+
+    }
 }
