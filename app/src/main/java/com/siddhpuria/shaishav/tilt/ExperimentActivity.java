@@ -91,6 +91,7 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
     };
 
     private SensorListener sensorListener;
+    private SensorInterpreter sensorInterpreter;
 
 
     @Override
@@ -129,6 +130,7 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
 
         sensorListener = new SensorListener(this);
         sensorListener.registerSensorRotationVector(this, SensorManager.SENSOR_DELAY_GAME);
+        sensorInterpreter = new SensorInterpreter();
 
     }
 
@@ -198,7 +200,8 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
     @Override
     public void notifySensorEventUpdate(SensorEvent event) {
 
-
+        SensorInterpreter.InterpretFrame frame = sensorInterpreter.interpretRotationVectorData(event);
+        ((ExperimentView) mContentView).updatePointerPosition(frame.screenOffsetX, frame.screenOffsetY);
 
     }
 }
