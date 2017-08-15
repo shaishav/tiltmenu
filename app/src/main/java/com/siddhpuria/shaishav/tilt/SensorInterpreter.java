@@ -14,6 +14,7 @@ public class SensorInterpreter {
 
     public ArrayList<InterpretFrame> interpretFrames = new ArrayList<>();
     private int inversion = -1;
+    private float tiltGain = 25.0f;
 
     public InterpretFrame interpretRotationVectorData(SensorEvent event) {
 
@@ -30,24 +31,14 @@ public class SensorInterpreter {
             float[] ypr = new float[3];
             rotVectorToYPR(event.values, ypr);
 
-            double yprMag = Math.sqrt(Math.pow(ypr[0], 2)+Math.pow(ypr[1], 2)+Math.pow(ypr[2], 2));
-
-//            ypr[0] /= yprMag;
-//            ypr[1] /= yprMag;
-//            ypr[2] /= yprMag;
-
-//            System.out.printf("x %f y %f z %f\n", x, y, z);
-//            System.out.printf("yaw %f pitch %f roll %f\n", Math.toDegrees(ypr[0]), Math.toDegrees(ypr[1]), Math.toDegrees(ypr[2]));
             float pitchDegrees = (float) Math.toDegrees(ypr[1]);
             float rollDegrees = (float) Math.toDegrees(ypr[2]);
 
             float sensorXdelta = -inversion * (rollDegrees - centerFrame.inputSensorX);
-            float currentX = 25 * (sensorXdelta + centerFrame.screenOffsetX);
+            float currentX = tiltGain * (sensorXdelta + centerFrame.screenOffsetX);
 
-            float sensorYdelta = inversion * (pitchDegrees - centerFrame.inputSensorY); //500 * (event.values[1] - lastFrame.inputSensorY);
-            float currentY = 25 * (sensorYdelta + centerFrame.screenOffsetY);
-
-//            System.out.printf("direction angle %f\n", Math.toDegrees(Math.atan(ypr[1]/ypr[2])));
+            float sensorYdelta = inversion * (pitchDegrees - centerFrame.inputSensorY);
+            float currentY = tiltGain * (sensorYdelta + centerFrame.screenOffsetY);
 
             interpretFrames.add(new InterpretFrame(event.timestamp, event.values[0], event.values[1], currentX, currentY));
         }
