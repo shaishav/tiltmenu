@@ -55,6 +55,12 @@ public class SensorInterpreter {
 
     }
 
+    public void recalibrateCenter() {
+
+        interpretFrames.clear();
+
+    }
+
     public void setShouldInvert(boolean flag) {
 
         inversion = flag ? -1 : 1;

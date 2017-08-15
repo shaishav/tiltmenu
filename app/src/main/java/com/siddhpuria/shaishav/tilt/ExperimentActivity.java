@@ -113,7 +113,7 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
         mContentView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                toggle();
+                sensorInterpreter.recalibrateCenter();
             }
         });
 
@@ -204,4 +204,5 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
         ((ExperimentView) mContentView).updatePointerPosition(frame.screenOffsetX, frame.screenOffsetY);
 
     }
+
 }
