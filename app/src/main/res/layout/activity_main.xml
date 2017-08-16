@@ -7,62 +7,112 @@
     tools:context="com.siddhpuria.shaishav.tilt.MainActivity">
 
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:layout_marginTop="8dp"
         android:orientation="vertical"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp">
 
         <EditText
-            android:id="@+id/editText4"
+            android:id="@+id/participant_id"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
+            android:hint="@string/MainActivity_pid_header"
             android:inputType="textPersonName"
-            android:text="Name" />
+            android:textAlignment="center"
+            android:textSize="24sp" />
 
-        <Button
-            android:id="@+id/button7"
+        <TextView
+            android:id="@+id/screen_type_label"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Button" />
+            android:layout_marginTop="30dip"
+            android:text="@string/MainActivity_screen_type_radio"
+            android:textAlignment="center"
+            android:textAppearance="@android:style/TextAppearance.Material.Title" />
+
+        <RadioGroup
+            android:id="@+id/variant_radio_group"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layout_weight="1">
+
+            <RadioButton
+                android:id="@+id/variant_twozone_radio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="50dip"
+                android:layout_weight="1"
+                android:layout_gravity="center|right"
+                android:text="@string/MainActivity_twozone_radio" />
+
+            <RadioButton
+                android:id="@+id/variant_fourzone_radio"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center|right"
+                android:text="@string/MainActivity_fourzone_radio" />
+
+        </RadioGroup>
+
+        <TextView
+            android:id="@+id/sensitivity_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dip"
+            android:text="@string/MainActivity_sensitivity_header"
+            android:textAlignment="center"
+            android:textAppearance="@android:style/TextAppearance.Material.Title" />
+
+        <SeekBar
+            android:id="@+id/sensitivity_bar"
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="10"
+            android:progress="3" />
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginTop="30dip"
             android:orientation="horizontal">
 
-            <RadioButton
-                android:id="@+id/radioButton3"
-                android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/invert_axis_header"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="RadioButton" />
+                android:text="@string/MainActivity_invert_axis_header"
+                android:textAlignment="center"
+                android:textAppearance="@android:style/TextAppearance.Material.Title" />
 
-            <RadioButton
-                android:id="@+id/radioButton2"
-                android:layout_width="wrap_content"
+            <ToggleButton
+                android:id="@+id/invert_axis_toggle"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="RadioButton" />
+                android:text="@string/MainActivity_invert_axis_toggle"
+                android:textAlignment="center"/>
         </LinearLayout>
-
-        <Button
-            android:id="@+id/button8"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Button" />
 
         <Button
             android:id="@+id/start_experiment_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="30dip"
             android:text="@string/MainActivity_start_button" />
 
     </LinearLayout>
