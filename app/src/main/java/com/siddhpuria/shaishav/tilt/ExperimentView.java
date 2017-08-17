@@ -207,7 +207,6 @@ public class ExperimentView extends View {
 
                     reentryConfirmed = false;
                 } else if (isInsideInner && isInsideOuter && !reentryConfirmed) {
-                    System.out.println("confirm reentry");
                     reentryConfirmed = true;
                 }
 

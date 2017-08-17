@@ -52,8 +52,6 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     experimentConfig.setInteraction(2);
-                } else {
-                    fourZoneRadio.setChecked(!isChecked);
                 }
             }
         });
@@ -64,10 +62,7 @@ public class MainActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     experimentConfig.setInteraction(4);
-                } else {
-                    twoZoneRadio.setChecked(!isChecked);
                 }
-
             }
         });
 
