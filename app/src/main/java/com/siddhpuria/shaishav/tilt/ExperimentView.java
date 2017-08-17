@@ -340,10 +340,10 @@ public class ExperimentView extends View {
             // draw string for menus
             paint.setColor(Color.BLACK);
             paint.setTextSize(48.0f);
-            canvas.drawText(menuValues[0], this.centerX, this.centerY - outerRadius/2.0f, paint);
-            canvas.drawText(menuValues[1], this.centerX + outerRadius/2.0f, this.centerY, paint);
-            canvas.drawText(menuValues[2], this.centerX, this.centerY + outerRadius/2.0f, paint);
-            canvas.drawText(menuValues[3], this.centerX - outerRadius/2.0f, this.centerY, paint);
+            canvas.drawText(menuValues[0], this.centerX - innerRadius/2.0f, this.centerY - innerRadius, paint);
+            canvas.drawText(menuValues[1], this.centerX + innerRadius/2.0f, this.centerY, paint);
+            canvas.drawText(menuValues[2], this.centerX - innerRadius/2.0f, this.centerY + innerRadius, paint);
+            canvas.drawText(menuValues[3], this.centerX - innerRadius, this.centerY, paint);
 
             // draw middle line
             paint.setStrokeWidth(4.0f);
