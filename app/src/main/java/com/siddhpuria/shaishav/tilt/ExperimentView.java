@@ -153,6 +153,7 @@ public class ExperimentView extends View {
                 float boundRadius = castedMenu.getInnerRadius() + radius;
                 boolean isInsideInner = magnitude <= boundRadius;
 
+                // hit test with both inner and outer rects and make sure selection only happens on a re-entry
                 if (!isInsideInner) {
 
                     int hitIndex = 0;
@@ -190,6 +191,7 @@ public class ExperimentView extends View {
                 boolean isInsideInner = innerBounds.contains(x, y);
                 boolean isInsideOuter = outerBounds.contains(x, y);
 
+                // hit test with both inner and outer rects and make sure selection only happens on a re-entry
                 if (!isInsideInner && isInsideOuter && reentryConfirmed) {
 
                     int hitIndex = 0;

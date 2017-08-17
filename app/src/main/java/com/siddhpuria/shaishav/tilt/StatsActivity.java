@@ -7,6 +7,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+/**
+ * StatsActivity.java
+ * Show raw stats information when an experiment successfully finishes with the option to share text to various services.
+ */
 public class StatsActivity extends AppCompatActivity {
 
     @Override

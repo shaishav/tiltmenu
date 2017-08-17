@@ -25,6 +25,7 @@ public class SensorInterpreter {
 
     }
 
+    // convert from raw rotation vector to yaw-pitch-roll, normalize, add tilt gain, invert (or not)
     public InterpretFrame interpretRotationVectorData(SensorEvent event) {
 
         if (interpretFrames.isEmpty()) {
@@ -56,6 +57,7 @@ public class SensorInterpreter {
 
     }
 
+    // use the Android libraries to convert the rotation vector from quaternions to its yaw-pitch-roll
     public void rotVectorToYPR(float[] inputRotationVector, float[] outputYPR) {
 
         float[] R = new float[9];
@@ -64,6 +66,7 @@ public class SensorInterpreter {
 
     }
 
+    // recalibrate for center by clearing the frames list (i.e. the reference frame)
     public void recalibrateCenter() {
 
         interpretFrames.clear();

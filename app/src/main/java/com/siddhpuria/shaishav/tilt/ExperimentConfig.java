@@ -14,16 +14,16 @@ import java.util.Arrays;
 public class ExperimentConfig {
 
     private JSONObject configData;
-    public final static String PARTICIPANT_KEY = "ParticipantName";
-    public final static String INTERACTION_KEY = "NumZones";
-    public final static String SENSITIVITY_KEY = "Sensitivity";
-    public final static String AXIS_INVERT_KEY = "AxisInverted";
+    private final static String PARTICIPANT_KEY = "ParticipantName";
+    private final static String INTERACTION_KEY = "NumZones";
+    private final static String SENSITIVITY_KEY = "Sensitivity";
+    private final static String AXIS_INVERT_KEY = "AxisInverted";
 
-    public static JSONObject TwoWayMenu;
-    public static ArrayList<String> TwoWayTasks;
+    private static JSONObject TwoWayMenu;
+    private static ArrayList<String> TwoWayTasks;
 
-    public static JSONObject FourWayMenu;
-    public static ArrayList<String> FourWayTasks;
+    private static JSONObject FourWayMenu;
+    private static ArrayList<String> FourWayTasks;
 
 
     public ExperimentConfig() {
@@ -46,6 +46,9 @@ public class ExperimentConfig {
 
     }
 
+    /**
+     * Build the menu hierarchies
+     */
     public static void BuildTwoWayMenu() {
 
         TwoWayMenu = new JSONObject();
@@ -92,6 +95,11 @@ public class ExperimentConfig {
 
     }
 
+    /**
+     * Convenience function to get the current menu information
+     * @param level
+     * @return String value of the menu at a specified position in the hierarchy
+     */
     public String menuOptionAt(int level) {
 
         String key = Integer.toString(level);

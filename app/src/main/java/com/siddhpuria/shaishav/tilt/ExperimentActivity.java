@@ -1,18 +1,11 @@
 package com.siddhpuria.shaishav.tilt;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.hardware.SensorEvent;
 import android.hardware.SensorManager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
@@ -21,23 +14,12 @@ import java.util.ArrayList;
 
 /**
  * ExperimentActivity.java
- * This assembles the tilt-menu interaction specifically to the configuration passed.
+ * This Activity drives the entire experiment by registering to listen to sensor data, feeding it
+ * into the interpretor, updating the view, and recording stats.
  */
 public class ExperimentActivity extends AppCompatActivity implements ModelObserver, ExperimentView.HitObserver {
 
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
     private View mContentView;
-    private View mControlsView;
-
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
 
     private SensorListener sensorListener;
     private SensorInterpreter sensorInterpreter;
@@ -66,7 +48,6 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
 
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
         experimentView = new ExperimentView(this, experimentConfig);
         experimentView.registerForHits(this);
         mContentView = experimentView;
@@ -85,6 +66,10 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
 
     }
 
+    /**
+     * Prepare the view (and start experiment) once everything is constructed
+     * @param savedInstanceState
+     */
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
@@ -126,12 +111,19 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
 
     }
 
+    /**
+     * Listener for menu selection events from the experiment view
+     * @param menuIndex
+     */
     @Override
     public void notifyHit(int menuIndex) {
         currentLevel = currentLevel == 0 ? menuIndex : (currentLevel * 10) + menuIndex;
         showMenusAtCurrentLevel();
     }
 
+    /**
+     * Update the experiment view to show the current menu hierarchy
+     */
     private void showMenusAtCurrentLevel() {
 
         ArrayList<String> newOpts = new ArrayList<>();
@@ -142,7 +134,7 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
             if (menuValue.isEmpty()) {
                 String hit = Integer.toString(currentLevel);
                 String expected = experimentConfig.getExpectedHitAtIndex(taskIndex);
-                boolean success = hit.equals(expected) ? true : false;
+                boolean success = hit.equals(expected);
                 long deltaTime = System.currentTimeMillis() - currentTaskStartTime;
                 experimentStats.addTaskResult(experimentConfig.getTaskStringAtIndex(taskIndex),success, deltaTime);
                 currentTaskStartTime = System.currentTimeMillis();
@@ -159,6 +151,9 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
 
     }
 
+    /**
+     * Pass all the relevant data for the experiment view to draw and update
+     */
     private void updateExperimentView() {
 
         if (taskIndex >= experimentConfig.getTotalTasks()) {
@@ -171,6 +166,9 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
 
     }
 
+    /**
+     * Get ready to finish the experiment and hand over the stats data
+     */
     private void cleanupAndFinish() {
         Intent returnIntent = new Intent();
         returnIntent.putExtra(MainActivity.EXPERIMENT_STATS, experimentStats.getStringRepresentation());
