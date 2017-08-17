@@ -44,9 +44,11 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
 
     private ExperimentConfig experimentConfig;
     private ExperimentView experimentView;
+    private ExperimentStats experimentStats;
 
     private int currentLevel = 0;
     private int taskIndex = 0;
+    private long currentTaskStartTime = 0;
 
 
     @Override
@@ -56,6 +58,7 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
         Intent intent = getIntent();
         String configString = intent.getStringExtra(MainActivity.EXPERIMENT_CONFIG);
         experimentConfig = new ExperimentConfig(configString);
+        experimentStats = new ExperimentStats(experimentConfig);
 
         setContentView(R.layout.activity_experiment);
         ActionBar actionBar = getSupportActionBar();
@@ -91,6 +94,7 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
         sensorInterpreter = new SensorInterpreter(experimentConfig);
         showMenusAtCurrentLevel();
         updateExperimentView();
+        currentTaskStartTime = System.currentTimeMillis();
 
     }
 
@@ -124,10 +128,8 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
 
     @Override
     public void notifyHit(int menuIndex) {
-
         currentLevel = currentLevel == 0 ? menuIndex : (currentLevel * 10) + menuIndex;
         showMenusAtCurrentLevel();
-
     }
 
     private void showMenusAtCurrentLevel() {
@@ -138,6 +140,12 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
             int key = (currentLevel * 10) + i;
             String menuValue = experimentConfig.menuOptionAt(key);
             if (menuValue.isEmpty()) {
+                String hit = Integer.toString(currentLevel);
+                String expected = experimentConfig.getExpectedHitAtIndex(taskIndex);
+                boolean success = hit.equals(expected) ? true : false;
+                long deltaTime = System.currentTimeMillis() - currentTaskStartTime;
+                experimentStats.addTaskResult(experimentConfig.getTaskStringAtIndex(taskIndex),success, deltaTime);
+                currentTaskStartTime = System.currentTimeMillis();
                 taskIndex++;
                 currentLevel = 0;
                 updateExperimentView();
@@ -151,10 +159,10 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
 
     }
 
-    public void updateExperimentView() {
+    private void updateExperimentView() {
 
         if (taskIndex >= experimentConfig.getTotalTasks()) {
-            finish();
+            cleanupAndFinish();
         } else {
             experimentView.setTaskLevelString("Tasks: " + Integer.toString(taskIndex) + "/" + experimentConfig.getTotalTasks());
             experimentView.setTaskString("Current Task: " + experimentConfig.getTaskStringAtIndex(taskIndex));
@@ -162,4 +170,12 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
         }
 
     }
+
+    private void cleanupAndFinish() {
+        Intent returnIntent = new Intent();
+        returnIntent.putExtra(MainActivity.EXPERIMENT_STATS, experimentStats.getStringRepresentation());
+        setResult(RESULT_OK, returnIntent);
+        finish();
+    }
+
 }

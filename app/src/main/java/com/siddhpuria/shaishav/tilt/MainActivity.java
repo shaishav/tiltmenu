@@ -23,6 +23,7 @@ import android.widget.ToggleButton;
 public class MainActivity extends AppCompatActivity {
 
     public static final String EXPERIMENT_CONFIG = "com.shaishav.siddhpuria.mainactivity.experimentconfig";
+    public static final String EXPERIMENT_STATS = "com.shaishav.siddhpuria.mainactivity.experimentstats";
     private ExperimentConfig experimentConfig;
 
     @Override
@@ -107,13 +108,26 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == 1 && resultCode == RESULT_OK) {
+            launchStatsActivity(data.getStringExtra(EXPERIMENT_STATS));
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
     /**
      * Launches the experiment activity based on the configuration options selected.
      */
     public void launchExperimentActivity() {
         Intent intent = new Intent(this, ExperimentActivity.class);
         intent.putExtra(EXPERIMENT_CONFIG, experimentConfig.getStringRepresentation());
-        System.out.println("config: "+experimentConfig.getStringRepresentation());
+        startActivityForResult(intent, 1);
+    }
+
+    public void launchStatsActivity(String statsData) {
+        Intent intent = new Intent(this, StatsActivity.class);
+        intent.putExtra(EXPERIMENT_STATS, experimentConfig.getStringRepresentation()+statsData);
         startActivity(intent);
     }
 

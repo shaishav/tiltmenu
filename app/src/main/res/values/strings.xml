@@ -9,10 +9,11 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
     <string name="MainActivity_screen_type_radio">Variant:</string>
-    <string name="MainActivity_twozone_radio" >two-zone</string>
+    <string name="MainActivity_twozone_radio">two-zone</string>
     <string name="MainActivity_fourzone_radio">four-zone</string>
     <string name="MainActivity_sensitivity_header">Sensitivity:</string>
     <string name="MainActivity_invert_axis_toggle">Invert Axis</string>
     <string name="MainActivity_invert_axis_header">Invert axis?</string>
     <string name="MainActivity_participant_header">Participant:</string>
+    <string name="StatsActivity_data_header" >Summary:</string>
 </resources>

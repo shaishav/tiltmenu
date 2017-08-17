@@ -5,8 +5,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 /**
  * ExperimentConfig.java
@@ -17,7 +15,7 @@ public class ExperimentConfig {
 
     private JSONObject configData;
     public final static String PARTICIPANT_KEY = "ParticipantName";
-    public final static String INTERACTION_KEY = "InteractionType";
+    public final static String INTERACTION_KEY = "NumZones";
     public final static String SENSITIVITY_KEY = "Sensitivity";
     public final static String AXIS_INVERT_KEY = "AxisInverted";
 
@@ -139,6 +137,10 @@ public class ExperimentConfig {
         taskString += menuOptionAt(key);
 
         return taskString;
+    }
+
+    public String getExpectedHitAtIndex(int taskIndex) {
+        return getNumZones() == 2 ? TwoWayTasks.get(taskIndex) : getNumZones() == 4 ? FourWayTasks.get(taskIndex) : "";
     }
 
     public int getTotalTasks() {
