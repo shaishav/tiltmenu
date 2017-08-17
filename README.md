@@ -2,7 +2,7 @@
 Menu selection experiment that presents a two-zone and a four-zone interface with a menu hierarchy and performance data logging functionality.
 
 # Introduction
-The application is based on the accelerometer+gyroscope (with Android's game rotation vector virtual sensor). The app
+The application is based on the accelerometer+gyroscope (with Android's game rotation vector virtual sensor).
 
 # Pre-requisites
 * Android SDK 23 (Recommended 25)
