@@ -15,6 +15,15 @@ public class SensorInterpreter {
     public ArrayList<InterpretFrame> interpretFrames = new ArrayList<>();
     private int inversion = -1;
     private float tiltGain = 25.0f;
+    private ExperimentConfig experimentConfig;
+
+    public SensorInterpreter(ExperimentConfig config) {
+
+        experimentConfig = config;
+        tiltGain = (experimentConfig.getSensitivity()+10);
+        inversion = config.getAxisInverted() ? 1 : -1;
+
+    }
 
     public InterpretFrame interpretRotationVectorData(SensorEvent event) {
 
@@ -58,12 +67,6 @@ public class SensorInterpreter {
     public void recalibrateCenter() {
 
         interpretFrames.clear();
-
-    }
-
-    public void setShouldInvert(boolean flag) {
-
-        inversion = flag ? -1 : 1;
 
     }
 

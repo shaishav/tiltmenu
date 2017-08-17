@@ -14,4 +14,5 @@
     <string name="MainActivity_sensitivity_header">Sensitivity:</string>
     <string name="MainActivity_invert_axis_toggle">Invert Axis</string>
     <string name="MainActivity_invert_axis_header">Invert axis?</string>
+    <string name="MainActivity_participant_header">Participant:</string>
 </resources>

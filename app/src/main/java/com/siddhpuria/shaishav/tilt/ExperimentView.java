@@ -11,6 +11,9 @@ import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.View;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 /**
  * ExperimentView.java
@@ -19,15 +22,51 @@ import android.view.View;
 
 public class ExperimentView extends View {
 
-    private Pointer pointer;
-    private MenuZone menuZone;
+    public interface HitObserver {
 
-    public ExperimentView(Context context) {
+        void notifyHit(int menuIndex);
+
+    }
+
+    private Pointer pointer;
+    public MenuZone menuZone;
+    private String taskLevelString = "Task:";
+    private String taskString = "";
+    private ExperimentConfig experimentConfig;
+    private ArrayList<HitObserver> hitObservers;
+
+    public ExperimentView(Context context, ExperimentConfig config) {
         super(context);
+
+        hitObservers = new ArrayList<>();
+
         pointer = new Pointer();
-        menuZone = new MenuZoneFour();
-        String menu[] = {"A", "B", "C", "D"};
-        menuZone.setOptions(menu);
+        this.experimentConfig = config;
+
+        if (config.getNumZones() == 2) {
+            menuZone = new MenuZoneTwo();
+            String[] options = {"a","b"};
+            menuZone.setOptions(options);
+        } else if (config.getNumZones() == 4) {
+            menuZone = new MenuZoneFour();
+            String[] options = {"a","b", "c", "d"};
+            menuZone.setOptions(options);
+        }
+
+        Toast.makeText(context, "Tap anywhere to reset and recalibrate.", Toast.LENGTH_LONG).show();
+
+    }
+
+    public void registerForHits(HitObserver obs) {
+        hitObservers.add(obs);
+    }
+
+    public void notifyHitObservers(int hitIndex) {
+
+        for (HitObserver obs : hitObservers) {
+            obs.notifyHit(hitIndex);
+        }
+
     }
 
     @Override
@@ -39,7 +78,10 @@ public class ExperimentView extends View {
         paint.setStyle(Paint.Style.FILL);
         paint.setColor(Color.WHITE);
         canvas.drawPaint(paint);
-
+        paint.setColor(Color.BLACK);
+        paint.setTextSize(36.0f);
+        canvas.drawText(taskLevelString, 50.0f, 200.0f, paint);
+        canvas.drawText(taskString, 50.0f, 300.0f, paint);
         menuZone.draw(canvas);
         pointer.draw(canvas);
 
@@ -51,15 +93,20 @@ public class ExperimentView extends View {
         this.invalidate();
     }
 
+    public void setTaskLevelString(String text) { taskLevelString = text; }
+    public void setTaskString(String text) { taskString = text; }
+
     /**
      * Pointer object to navigate for menu selection.
      * This will be drawn at relative x,y offsets to center of the interaction being (0,0)
      */
     public class Pointer extends Drawable {
 
-        private float x, y;
-        private float centerX, centerY;
+        private int x, y;
+        private int centerX, centerY;
         private Canvas canvas = null;
+        private boolean reentryConfirmed = true;
+        private int radius = 25;
 
         @Override
         public void draw(@NonNull Canvas canvas) {
@@ -71,7 +118,6 @@ public class ExperimentView extends View {
                 centerY = y;
             }
 
-            int radius = 50;
             Paint paint = new Paint();
             paint.setColor(Color.RED);
             canvas.drawCircle(x, y, radius, paint);
@@ -80,43 +126,90 @@ public class ExperimentView extends View {
         public void drawAtOffset(float xOffset, float yOffset) {
             if (canvas == null) return;
 
-            x = this.centerX + xOffset;
-            y = this.centerY + yOffset;
+            x = this.centerX + Math.round(xOffset);
+            y = this.centerY + Math.round(yOffset);
 
             // using java's reflection for bounds checking
             if (menuZone.getClass() == MenuZoneTwo.class) {
+
+                MenuZoneTwo castedMenu = (MenuZoneTwo) menuZone;
+
+                x = this.centerX + Math.round(xOffset);
+                y = this.centerY + Math.round(yOffset);
 
                 double magnitude = Math.sqrt(xOffset*xOffset + yOffset*yOffset);
                 xOffset /= magnitude;
                 yOffset /= magnitude;
 
-                float boundRadius = ((MenuZoneTwo) menuZone).getBoundRadius();
-
-                if (magnitude > boundRadius) {
-                    xOffset *= boundRadius;
-                    yOffset *= boundRadius;
-
-                    x = this.centerX + xOffset;
-                    y = this.centerY + yOffset;
-
-                    if (y < this.centerY) {
-                        String[] newMenu = {"AB", "CD"};
-                        menuZone.setOptions(newMenu);
-                    } else {
-                        String[] newMenu = {"CD", "AB"};
-                        menuZone.setOptions(newMenu);
-                    }
+                boolean isInsideOuter = magnitude <= castedMenu.getBoundRadius()-radius;
+                if (!isInsideOuter) {
+                    xOffset *= (castedMenu.getBoundRadius()-radius);
+                    yOffset *= (castedMenu.getBoundRadius()-radius);
+                    x = this.centerX + Math.round(xOffset);
+                    y = this.centerY + Math.round(yOffset);
                 }
+
+
+                float boundRadius = castedMenu.getInnerRadius() + radius;
+                boolean isInsideInner = magnitude <= boundRadius;
+
+                if (!isInsideInner) {
+
+                    int hitIndex = 0;
+
+                    // check if hit is top menu or bottom
+                    if (y < this.centerY) {
+                        hitIndex = 1;
+                    } else {
+                        hitIndex = 2;
+                    }
+
+                    if (reentryConfirmed) {
+                        notifyHitObservers(hitIndex);
+                        reentryConfirmed = false;
+                    }
+
+                } else {
+
+
+
+                    reentryConfirmed = true;
+                }
+
             } else if (menuZone.getClass() == MenuZoneFour.class) {
 
-                double magnitude = Math.sqrt(xOffset*xOffset + yOffset*yOffset);
-                Rect bounds = ((MenuZoneFour) menuZone).getSquareBounds();
+                MenuZoneFour castedMenu = (MenuZoneFour) menuZone;
 
-                xOffset = Math.min(bounds.right, Math.max(bounds.left, this.centerX+xOffset));
-                yOffset = Math.min(bounds.bottom, Math.max(bounds.top, this.centerY+yOffset));
+                Rect limitBounds = castedMenu.getOuterRectBounds();
+                x = Math.min(limitBounds.right-radius, Math.max(limitBounds.left+radius, this.centerX+Math.round(xOffset)));
+                y = Math.min(limitBounds.bottom-radius, Math.max(limitBounds.top+radius, this.centerY+Math.round(yOffset)));
 
-                x = xOffset;
-                y = yOffset;
+                Rect innerBounds = castedMenu.getInnerRectBounds();
+                Rect outerBounds = castedMenu.getOuterRectBounds();
+
+                boolean isInsideInner = innerBounds.contains(x, y);
+                boolean isInsideOuter = outerBounds.contains(x, y);
+
+                if (!isInsideInner && isInsideOuter && reentryConfirmed) {
+
+                    int hitIndex = 0;
+
+                    boolean hitTop = innerBounds.top > y;
+                    if (hitTop) hitIndex = 1;
+                    boolean hitRight = innerBounds.right < x;
+                    if (hitRight) hitIndex = 2;
+                    boolean hitBottom = innerBounds.bottom < y;
+                    if (hitBottom) hitIndex = 3;
+                    boolean hitLeft = innerBounds.left > x;
+                    if (hitLeft) hitIndex = 4;
+
+                    notifyHitObservers(hitIndex);
+
+                    reentryConfirmed = false;
+                } else if (isInsideInner && isInsideOuter && !reentryConfirmed) {
+                    System.out.println("confirm reentry");
+                    reentryConfirmed = true;
+                }
 
             }
         }
@@ -137,18 +230,17 @@ public class ExperimentView extends View {
 
         protected int lightBlueColor = Color.argb(255, 218, 237, 255);
         protected int darkBlueColor = Color.argb(255, 182, 221, 255);
-        protected float centerX;
-        protected float centerY;
+        protected int centerX;
+        protected int centerY;
         protected Canvas canvas;
-        protected  int numVisibleItems = 0;
 
         @Override
         public void draw(@NonNull Canvas canvas) {
 
             if (this.canvas == null) {
                 this.canvas = canvas;
-                this.centerX = canvas.getWidth()/2;
-                this.centerY = canvas.getHeight()/2;
+                this.centerX = Math.round(canvas.getWidth()/2);
+                this.centerY = Math.round(canvas.getHeight()/2);
             }
 
         }
@@ -165,7 +257,6 @@ public class ExperimentView extends View {
 
         public MenuZoneTwo() {
             super();
-            numVisibleItems = 2;
         }
 
         @Override
@@ -192,8 +283,10 @@ public class ExperimentView extends View {
             canvas.drawLine(this.centerX - outerRadius, this.centerY, this.centerX + outerRadius, this.centerY, paint);
         }
 
+        public float getInnerRadius() { return innerRadius; }
+
         public float getBoundRadius() {
-            return (innerRadius+outerRadius)/2.0f;
+            return outerRadius;
         }
 
         @Override
@@ -201,8 +294,6 @@ public class ExperimentView extends View {
             menuValues = options;
             invalidate();
         }
-
-        public int getNumVisibleItems() { return numVisibleItems; }
 
         @Override
         public void setAlpha(@IntRange(from = 0, to = 255) int alpha) { throw new UnsupportedOperationException(); }
@@ -217,13 +308,18 @@ public class ExperimentView extends View {
 
     public class MenuZoneFour extends MenuZone {
 
-        private float innerRadius = 250.0f;
-        private float outerRadius = 350.0f;
+        private int innerRadius = 250;
+        private int outerRadius = 350;
         private String[] menuValues = new String[4];
+        private Rect innerRect;
+        private Rect outerRect;
 
         public MenuZoneFour() {
             super();
-            numVisibleItems = 4;
+
+            outerRect = new Rect(this.centerX-outerRadius, this.centerY-outerRadius, this.centerX+outerRadius, this.centerY+outerRadius);
+            innerRect = new Rect(this.centerX-innerRadius, this.centerY-innerRadius, this.centerX+innerRadius, this.centerY+innerRadius);
+
         }
 
         @Override
@@ -233,19 +329,22 @@ public class ExperimentView extends View {
             Paint paint = new Paint();
             paint.setStyle(Paint.Style.FILL_AND_STROKE);
 
+            outerRect.offsetTo(this.centerX-outerRadius, this.centerY-outerRadius);
+            innerRect.offsetTo(this.centerX-innerRadius, this.centerY-innerRadius);
+
             paint.setColor(this.darkBlueColor);
-            canvas.drawRect(this.centerX-outerRadius, this.centerY-outerRadius, this.centerX+outerRadius, this.centerY+outerRadius, paint);
+            canvas.drawRect(outerRect, paint);
 
             paint.setColor(this.lightBlueColor);
-            canvas.drawRect(this.centerX-innerRadius, this.centerY-innerRadius, this.centerX+innerRadius, this.centerY+innerRadius, paint);
+            canvas.drawRect(innerRect, paint);
 
             // draw string for menus
             paint.setColor(Color.BLACK);
             paint.setTextSize(48.0f);
-            canvas.drawText(menuValues[0], this.centerX, this.centerY - outerRadius/1.5f, paint);
-            canvas.drawText(menuValues[1], this.centerX + outerRadius/1.5f, this.centerY, paint);
-            canvas.drawText(menuValues[2], this.centerX, this.centerY + outerRadius/1.5f, paint);
-            canvas.drawText(menuValues[3], this.centerX - outerRadius/1.5f, this.centerY, paint);
+            canvas.drawText(menuValues[0], this.centerX, this.centerY - outerRadius/2.0f, paint);
+            canvas.drawText(menuValues[1], this.centerX + outerRadius/2.0f, this.centerY, paint);
+            canvas.drawText(menuValues[2], this.centerX, this.centerY + outerRadius/2.0f, paint);
+            canvas.drawText(menuValues[3], this.centerX - outerRadius/2.0f, this.centerY, paint);
 
             // draw middle line
             paint.setStrokeWidth(4.0f);
@@ -253,9 +352,12 @@ public class ExperimentView extends View {
             canvas.drawLine(this.centerX + outerRadius, this.centerY - outerRadius, this.centerX - outerRadius, this.centerY + outerRadius, paint);
         }
 
-        public Rect getSquareBounds() {
-            float midPoint = (innerRadius+outerRadius)/2.0f;
-            return new Rect((int) (this.centerX-midPoint), (int) (this.centerY-midPoint), (int) (this.centerX+midPoint), (int) (this.centerY+midPoint));
+        public Rect getInnerRectBounds() {
+            return innerRect;
+        }
+
+        public Rect getOuterRectBounds() {
+            return outerRect;
         }
 
         @Override
@@ -263,8 +365,6 @@ public class ExperimentView extends View {
             menuValues = options;
             invalidate();
         }
-
-        public int getNumVisibleItems() { return numVisibleItems; }
 
         @Override
         public void setAlpha(@IntRange(from = 0, to = 255) int alpha) { throw new UnsupportedOperationException(); }

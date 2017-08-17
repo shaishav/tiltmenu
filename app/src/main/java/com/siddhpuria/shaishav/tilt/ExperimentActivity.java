@@ -1,6 +1,7 @@
 package com.siddhpuria.shaishav.tilt;
 
 import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -15,11 +16,13 @@ import android.view.View;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
+import java.util.ArrayList;
+
 /**
  * ExperimentActivity.java
  * This assembles the tilt-menu interaction specifically to the configuration passed.
  */
-public class ExperimentActivity extends AppCompatActivity implements ModelObserver {
+public class ExperimentActivity extends AppCompatActivity implements ModelObserver, ExperimentView.HitObserver {
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -93,10 +96,20 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
     private SensorListener sensorListener;
     private SensorInterpreter sensorInterpreter;
 
+    private ExperimentConfig experimentConfig;
+    private ExperimentView experimentView;
+
+    private int currentLevel = 0;
+    private int taskIndex = 0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Intent intent = getIntent();
+        String configString = intent.getStringExtra(MainActivity.EXPERIMENT_CONFIG);
+        experimentConfig = new ExperimentConfig(configString);
 
         setContentView(R.layout.activity_experiment);
         ActionBar actionBar = getSupportActionBar();
@@ -106,7 +119,10 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
 
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
-        mContentView = new ExperimentView(this);
+        experimentView = new ExperimentView(this, experimentConfig);
+        experimentView.registerForHits(this);
+        mContentView = experimentView;
+
         setContentView(mContentView);
 
         // Set up the user interaction to manually show or hide the system UI.
@@ -114,6 +130,8 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
             @Override
             public void onClick(View view) {
                 sensorInterpreter.recalibrateCenter();
+                currentLevel = 0;
+                showMenusAtCurrentLevel();
             }
         });
 
@@ -130,7 +148,9 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
 
         sensorListener = new SensorListener(this);
         sensorListener.registerSensorRotationVector(this, SensorManager.SENSOR_DELAY_GAME);
-        sensorInterpreter = new SensorInterpreter();
+        sensorInterpreter = new SensorInterpreter(experimentConfig);
+        showMenusAtCurrentLevel();
+        updateExperimentView();
 
     }
 
@@ -201,8 +221,46 @@ public class ExperimentActivity extends AppCompatActivity implements ModelObserv
     public void notifySensorEventUpdate(SensorEvent event) {
 
         SensorInterpreter.InterpretFrame frame = sensorInterpreter.interpretRotationVectorData(event);
-        ((ExperimentView) mContentView).updatePointerPosition(frame.screenOffsetX, frame.screenOffsetY);
+        experimentView.updatePointerPosition(frame.screenOffsetX, frame.screenOffsetY);
 
     }
 
+    @Override
+    public void notifyHit(int menuIndex) {
+
+        currentLevel = currentLevel == 0 ? menuIndex : (currentLevel * 10) + menuIndex;
+        showMenusAtCurrentLevel();
+
+    }
+
+    private void showMenusAtCurrentLevel() {
+
+        ArrayList<String> newOpts = new ArrayList<>();
+
+        for (int i = 1; i <= experimentConfig.getNumZones(); i++) {
+            int key = (currentLevel * 10) + i;
+            String menuValue = experimentConfig.menuOptionAt(key);
+            System.out.println(menuValue);
+            if (menuValue.isEmpty()) {
+                // no more menu
+                taskIndex++;
+                currentLevel = 0;
+                updateExperimentView();
+                return;
+            }
+            newOpts.add(menuValue);
+        }
+
+        String[] optionsArray = newOpts.toArray(new String[newOpts.size()]);
+        ((ExperimentView) mContentView).menuZone.setOptions(optionsArray);
+
+    }
+
+    public void updateExperimentView() {
+
+        experimentView.setTaskLevelString("Tasks: "+Integer.toString(taskIndex)+"/"+experimentConfig.getTotalTasks());
+        experimentView.setTaskString("Current Task: "+experimentConfig.getTaskStringAtIndex(taskIndex));
+        showMenusAtCurrentLevel();
+
+    }
 }

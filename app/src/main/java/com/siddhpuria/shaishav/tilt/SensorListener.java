@@ -22,10 +22,9 @@ public class SensorListener implements SensorEventListener2 {
     private HashMap<Sensor, ArrayList<ModelObserver>> sensorObserversMap;
 
 
-
     public SensorListener(Context ctx) {
         sensorManager = (SensorManager) ctx.getSystemService(ctx.SENSOR_SERVICE);
-        rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        rotationVectorSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR);
 
         sensorObserversMap = new HashMap<>();
         sensorObserversMap.put(rotationVectorSensor, new ArrayList<ModelObserver>());
@@ -45,7 +44,7 @@ public class SensorListener implements SensorEventListener2 {
 
     @Override
     public void onSensorChanged(SensorEvent event) {
-        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR) {
+        if (event.sensor.getType() == Sensor.TYPE_GAME_ROTATION_VECTOR) {
 
             for (ModelObserver obs : sensorObserversMap.get(rotationVectorSensor)) {
                 obs.notifySensorEventUpdate(event);

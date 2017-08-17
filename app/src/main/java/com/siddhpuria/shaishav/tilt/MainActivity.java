@@ -74,12 +74,15 @@ public class MainActivity extends AppCompatActivity {
         twoZoneRadio.setChecked(experimentConfig.getNumZones()==2);
         fourZoneRadio.setChecked(experimentConfig.getNumZones()==4);
 
+        final TextView sensitivityHeader = (TextView) findViewById(R.id.sensitivity_header);
         final SeekBar sensitivity = (SeekBar) findViewById(R.id.sensitivity_bar);
+        sensitivityHeader.setText("Sensitivity: "+experimentConfig.getSensitivity());
         sensitivity.setProgress(experimentConfig.getSensitivity());
         sensitivity.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 experimentConfig.setSensitivity(progress);
+                sensitivityHeader.setText("Sensitivity: "+experimentConfig.getSensitivity());
             }
 
             @Override
